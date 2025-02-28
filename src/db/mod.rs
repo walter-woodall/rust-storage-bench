@@ -917,17 +917,6 @@ impl DatabaseWrapper {
             }
         }
 
-        self.write_latency.fetch_add(
-            start.elapsed().as_nanos() as u64,
-            std::sync::atomic::Ordering::Relaxed,
-        );
-
-        self.write_ops
-            .fetch_add(count, std::sync::atomic::Ordering::Relaxed);
-
-        self.written_bytes
-            .fetch_add(bytes_written as u64, std::sync::atomic::Ordering::Relaxed);
-
         log::info!("Ingested {count} initial items in {:?}", start.elapsed());
     }
 
