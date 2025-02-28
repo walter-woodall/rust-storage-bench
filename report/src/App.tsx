@@ -121,6 +121,11 @@ function App() {
 						formatter={millify}
 					/>
 					<LineChart
+						title="Disk read i/o"
+						timeseries={reactiveTimeseries.get("disk_reads_kib")}
+						formatter={kib => prettyBytes(kib * 1_024)}
+					/>
+					<LineChart
 						title="Range latency"
 						timeseries={reactiveTimeseries.get("range_latency")}
 						formatter={formatNano}
