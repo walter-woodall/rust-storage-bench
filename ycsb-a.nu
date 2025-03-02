@@ -14,7 +14,7 @@ let value_size = 256
 # BENCH
 #
 
-alias bench = cargo run -r --
+alias bench = cargo run --features localfjall -r --
 
 let cache = $cache_mib * 1_024 * 1_024
 
@@ -24,7 +24,7 @@ for db_size in [100000000] {
     for task in ["ycsb-a"] {
         let prefix = [$prefix, $task, (($ks | into string) + "K")] | str join "_";
 
-        for db in ["fjall", "local-fjall"] {
+        for db in ["local-fjall", "fjall"] {
             let out = $prefix + "_" + $db + ".jsonl";
             print $out;
             RUST_LOG=error bench run --seconds $seconds --out $out --workload $task --value-size $value_size --backend $db --data-dir $data_dir --item-count $db_size --cache-size $cache_mib --lsm-compaction tiered
