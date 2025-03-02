@@ -124,7 +124,7 @@ export function useMetricsData() {
 			const _system = JSON.parse(lines[0]);
 			const args = JSON.parse(lines[1]);
 
-			const color = chooseColor(args.backend);
+			const color = chooseColor(args.display_name);
 
 			setups.push({
 				displayName: args.display_name,

@@ -12,26 +12,8 @@ export function formatNano(nanos: number): string {
 }
 
 export function chooseColor(backend: string): string {
-	if (backend.includes("redb")) {
+	if (backend.includes("monkey")) {
 		return "#ffffff";
-	}
-	if (backend.includes("sled")) {
-		return "#ee5555";
-	}
-	if (backend.includes("localfjall")) {
-		return "#4455FF";
-	}
-	if (backend.includes("fjall")) {
-		return "#38bdf8";
-	}
-	if (backend.includes("rocksdb")) {
-		return "#fbbf24";
-	}
-	if (backend.includes("heed")) {
-		return "#ff7700";
-	}
-	if (backend.includes("sqlite")) {
-		return "#00ffdd";
 	}
 	return "#f472b6"
 }
