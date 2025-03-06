@@ -125,6 +125,18 @@ pub fn start_monitor(
                     ((disk_space_kib * 1_024) as f64) / (written_user_bytes as f64)
                 };
 
+                // Calculate read amplification factor - the ratio between logical read operations and disk reads
+                let read_amp = if point_read_ops == 0 {
+                    1.0
+                } else {
+                    let read_user_bytes = db.read_user_bytes.load(Ordering::Relaxed);
+                    if read_user_bytes == 0 {
+                        1.0
+                    } else {
+                        (disk.total_read_bytes as f64) / (read_user_bytes as f64)
+                    }
+                };
+
                 let l0_avg_segment_lifetime_ms = {
                     let now = unix_timestamp().as_micros() as u64;
                     let l0_avg_creation_date = db.avg_l0_segment_creation_date_us();
@@ -181,7 +193,9 @@ pub fn start_monitor(
                     format!("{:.2}", space_amp)
                         .parse::<f64>()
                         .unwrap_or_default(),
-                    1.0, // TODO: read amp
+                    format!("{:.2}", read_amp)
+                        .parse::<f64>()
+                        .unwrap_or_default(),
                 ]);
 
                 writeln!(&mut file_writer, "{json}").unwrap();

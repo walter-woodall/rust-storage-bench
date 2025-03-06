@@ -150,6 +150,11 @@ function App() {
 						timeseries={reactiveTimeseries.get("range_potential")}
 						formatter={millify}
 					/>
+					<LineChart
+						title="Read Amplification"
+						timeseries={reactiveTimeseries.get("read_amp")}
+						formatter={(x) => `${x.toFixed(2)}x`}
+					/>
 
 					{/* PERCENTILES */}
 					<div class="p-2 bg-neutral-100 dark:bg-neutral-900 rounded">
@@ -245,6 +250,11 @@ function App() {
 							Only work for Fjall currently
 						</div>
 						<div class="grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
+							<LineChart
+								title="Read Amplification Ratio"
+								timeseries={reactiveTimeseries.get("read_amp")}
+								formatter={(x) => `${x.toFixed(2)}x (logical:physical)`}
+							/>
 							<LineChart
 								title="Bloom filter size"
 								timeseries={reactiveTimeseries.get("bloom_filter_size")}

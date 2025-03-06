@@ -55,6 +55,8 @@ pub struct DatabaseWrapper {
 
     pub write_latency_histogram: Arc<Mutex<Histogram<u64>>>,
     pub point_read_latency_histogram: Arc<Mutex<Histogram<u64>>>,
+
+    pub read_user_bytes: Arc<AtomicU64>,
 }
 
 impl std::ops::Deref for DatabaseWrapper {
@@ -629,6 +631,8 @@ impl DatabaseWrapper {
             delete_ops: Default::default(),
             deleted_bytes: Default::default(),
             delete_latency: Default::default(), */
+
+            read_user_bytes: Default::default(),
         }
     }
 
@@ -806,10 +810,14 @@ impl DatabaseWrapper {
             }
 
             #[cfg(feature = "localfjall")]
-            GenericDatabase::LocalFjall { db, .. } => {
-                let item = db.get(key).unwrap();
+            GenericDatabase::LocalFjall { db, keyspace } => {
+                let read_tx = keyspace.read_tx();
+                let value = read_tx.get(db, key).unwrap();
                 report_latency();
-                item.map(|x| x.to_vec())
+                if let Some(value) = &value {
+                    self.read_user_bytes.fetch_add(value.len() as u64, std::sync::atomic::Ordering::Relaxed);
+                }
+                value.map(|slice| slice.to_vec())
             }
 
             GenericDatabase::Sled(db) => {
