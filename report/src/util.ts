@@ -28,6 +28,21 @@ export function chooseColor(backend: string): string {
 		"#06b6d4", // Cyan
 		"#a855f7", // Violet
 		"#64748b", // Slate
+		// Additional colors to double the palette
+		"#0891b2", // Darker cyan
+		"#4338ca", // Darker indigo
+		"#b91c1c", // Darker red
+		"#15803d", // Darker green
+		"#c2410c", // Darker orange
+		"#7e22ce", // Darker purple
+		"#a16207", // Darker amber
+		"#be185d", // Darker fuchsia
+		"#334155", // Darker slate
+		"#facc15", // Yellow
+		"#d946ef", // Pink
+		"#2dd4bf", // Light teal
+		"#fb7185", // Light red
+		"#818cf8", // Light indigo
 	];
 
 	// Use a simple hash function to select a color based on the backend name
