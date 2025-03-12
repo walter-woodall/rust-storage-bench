@@ -39,7 +39,7 @@ const RESULT_PLACEHOLDER: &str = "<!-- __DATA__ -->";
 
 pub fn main() -> std::io::Result<()> {
     env_logger::Builder::from_default_env()
-        .filter_module("rust_storage_bench", log::LevelFilter::Debug)
+        .filter_level(log::LevelFilter::Info)
         .init();
 
     log::info!("rust-storage-bench {}", env!("CARGO_PKG_VERSION"));

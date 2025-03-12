@@ -19,7 +19,7 @@ alias bench = cargo run --features localfjall -r --
 
 let cache = $cache_mib * 1_024 * 1_024
 
-for db_size in [20_000_000] {
+for db_size in [40_000_000] {
     let ks = $db_size / 1000;
 
     for task in ["ycsb-c"] {

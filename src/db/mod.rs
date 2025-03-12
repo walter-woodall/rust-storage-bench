@@ -546,33 +546,17 @@ impl DatabaseWrapper {
             #[cfg(feature = "localfjall")]
             Backend::LocalFjall => {
                 let mut config = local_fjall::Config::new(path)
-                    .compaction_workers(7)
                     .max_write_buffer_size(256 * 1_024 * 1_024)
                     .manual_journal_persist(true);
 
-                // TODO: fjall will unify caches... soon
-                config = if args.value_size
-                    >= local_fjall::KvSeparationOptions::default().separation_threshold
-                {
-                    config
-                        .block_cache(
-                            local_fjall::BlockCache::with_capacity_bytes(args.cache_size / 100 * 5)
-                                .into(),
-                        )
-                        .blob_cache(
-                            local_fjall::BlobCache::with_capacity_bytes(args.cache_size / 100 * 95)
-                                .into(),
-                        )
-                } else {
-                    config.block_cache(
-                        local_fjall::BlockCache::with_capacity_bytes(args.cache_size).into(),
-                    )
-                };
+                config = config.block_cache(
+                    local_fjall::BlockCache::with_capacity_bytes(args.cache_size).into(),
+                );
 
                 let keyspace = config.open_transactional().unwrap();
 
                 let mut create_opts = local_fjall::PartitionCreateOptions::default()
-                    .max_memtable_size(64 * 1_024 * 1_024)
+                    .max_memtable_size(16 * 1_024 * 1_024)
                     .block_size(4 * 1_024)
                     .compaction_strategy(match args.lsm_compaction {
                         crate::args::LsmCompaction::Leveled => {
@@ -586,12 +570,6 @@ impl DatabaseWrapper {
                             )
                         }
                     });
-
-                if args.value_size
-                    >= local_fjall::KvSeparationOptions::default().separation_threshold
-                {
-                    create_opts = create_opts.with_kv_separation(Default::default());
-                }
 
                 let db = keyspace.open_partition("data", create_opts).unwrap();
 
@@ -631,7 +609,6 @@ impl DatabaseWrapper {
             delete_ops: Default::default(),
             deleted_bytes: Default::default(),
             delete_latency: Default::default(), */
-
             read_user_bytes: Default::default(),
         }
     }
@@ -815,7 +792,8 @@ impl DatabaseWrapper {
                 let value = read_tx.get(db, key).unwrap();
                 report_latency();
                 if let Some(value) = &value {
-                    self.read_user_bytes.fetch_add(value.len() as u64, std::sync::atomic::Ordering::Relaxed);
+                    self.read_user_bytes
+                        .fetch_add(value.len() as u64, std::sync::atomic::Ordering::Relaxed);
                 }
                 value.map(|slice| slice.to_vec())
             }
