@@ -23,6 +23,8 @@ pub fn start_monitor(
     let mut prev_write_ops = 0;
     let mut prev_point_read_ops = 0;
     let mut prev_range_ops = 0;
+    // Track baseline disk reads to properly calculate read amplification
+    let mut baseline_disk_reads = None;
 
     log::debug!("Starting monitor");
 
@@ -130,10 +132,19 @@ pub fn start_monitor(
                     1.0
                 } else {
                     let read_user_bytes = db.read_user_bytes.load(Ordering::Relaxed);
+                    
+                    // Set the baseline disk reads when we detect the first read operation
+                    if baseline_disk_reads.is_none() && read_user_bytes > 0 {
+                        baseline_disk_reads = Some(disk.total_read_bytes);
+                        log::debug!("First read detected, setting baseline disk reads to {} bytes", disk.total_read_bytes);
+                    }
+                    
                     if read_user_bytes == 0 {
                         1.0
                     } else {
-                        (disk.total_read_bytes as f64) / (read_user_bytes as f64)
+                        // Calculate read amplification using the baseline to avoid counting previous I/O
+                        let disk_reads_since_baseline = disk.total_read_bytes - baseline_disk_reads.unwrap_or(disk.total_read_bytes);
+                        (disk_reads_since_baseline as f64) / (read_user_bytes as f64)
                     }
                 };
 
