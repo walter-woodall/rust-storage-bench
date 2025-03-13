@@ -83,6 +83,7 @@ export function useMetricsData() {
 	const [percentiles, setPercentiles] = createStore({
 		writePercentiles: [] as GroupedSeries[],
 		pointReadPercentiles: [] as GroupedSeries[],
+		readAmpEndValues: [] as GroupedSeries[],
 	});
 
 	onMount(() => {
@@ -187,6 +188,51 @@ export function useMetricsData() {
 
 			for (const name of columnNames) {
 				reactiveTimeseries.set(name as ColumnKey, []);
+			}
+
+			// Store final read amplification value
+			const readAmpIndex = columnNames.indexOf("read_amp");
+			
+			if (readAmpIndex !== -1) {
+				// Find the last valid data line before any special entries like histograms
+				let lastValidDataLineIndex = -1;
+				for (let i = lines.length - 1; i >= 3; i--) {
+					try {
+						const parsed = JSON.parse(lines[i]);
+						// Skip special entries like histograms or fin markers
+						if (typeof parsed === 'object' && (parsed.histogram || parsed.fin)) {
+							continue;
+						}
+						// If it's an array of metrics, this is a valid data line
+						if (Array.isArray(parsed)) {
+							lastValidDataLineIndex = i;
+							break;
+						}
+					} catch (e) {
+						// Skip lines that can't be parsed as JSON
+						continue;
+					}
+				}
+				
+				if (lastValidDataLineIndex !== -1) {
+					try {
+						const metrics = JSON.parse(lines[lastValidDataLineIndex]) as number[];
+						const finalReadAmp = metrics[readAmpIndex];
+						
+						setPercentiles(
+							produce((x) => {
+								x.readAmpEndValues.push({
+									// Use a single value for the bar chart
+									data: [finalReadAmp],
+									name: args.display_name,
+									color,
+								});
+							}),
+						);
+					} catch (e) {
+						console.error("Failed to parse final read amplification value", e);
+					}
+				}
 			}
 
 			const timeseries: Partial<Record<ColumnKey, TimeSeries>> = {};

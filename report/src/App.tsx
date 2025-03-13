@@ -150,11 +150,55 @@ function App() {
 						timeseries={reactiveTimeseries.get("range_potential")}
 						formatter={millify}
 					/>
+
 					<LineChart
-						title="Read Amplification"
+						title="Read Amplification (time series)"
 						timeseries={reactiveTimeseries.get("read_amp")}
 						formatter={(x) => `${x.toFixed(2)}x`}
 					/>
+					
+					{/* Read Amplification Bar Chart */}
+					<div class="p-2 bg-neutral-100 dark:bg-neutral-900 rounded">
+						{(() => {
+							return (
+								<SolidApexCharts
+									type="bar"
+									width="100%"
+									options={{
+										title: {
+											text: "Read Amplification",
+											style: {
+												color: "white",
+											},
+										},
+										...COMMON_CHART_OPTS({
+											yFormatter: (x) => `${x.toFixed(2)}x`,
+											dashed: 0,
+										}),
+										xaxis: {
+											categories: ["Physical:Logical Ratio"],
+											labels: {
+												style: {
+													colors: ["white"],
+												},
+											},
+										},
+										dataLabels: {
+											enabled: true,
+											formatter: (x) => `${typeof x === 'number' ? x.toFixed(2) : x}x`,
+											dropShadow: {
+												enabled: true,
+											},
+										},
+										stroke: {
+											show: false,
+										},
+									}}
+									series={percentiles.readAmpEndValues}
+								/>
+							);
+						})()}
+					</div>
 
 					{/* PERCENTILES */}
 					<div class="p-2 bg-neutral-100 dark:bg-neutral-900 rounded">
@@ -249,12 +293,12 @@ function App() {
 						<div class="rounded-lg p-3 mx-3 dark:text-yellow-100 dark:bg-yellow-950">
 							Only work for Fjall currently
 						</div>
-						<div class="grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
-							<LineChart
+						<LineChart
 								title="Read Amplification Ratio"
 								timeseries={reactiveTimeseries.get("read_amp")}
 								formatter={(x) => `${x.toFixed(2)}x (logical:physical)`}
-							/>
+						/>
+						<div class="grid md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
 							<LineChart
 								title="Bloom filter size"
 								timeseries={reactiveTimeseries.get("bloom_filter_size")}
