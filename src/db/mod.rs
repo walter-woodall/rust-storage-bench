@@ -788,14 +788,13 @@ impl DatabaseWrapper {
 
             #[cfg(feature = "localfjall")]
             GenericDatabase::LocalFjall { db, keyspace } => {
-                let read_tx = keyspace.read_tx();
-                let value = read_tx.get(db, key).unwrap();
+                let item = db.get(key).unwrap();
                 report_latency();
-                if let Some(value) = &value {
+                if let Some(value) = &item {
                     self.read_user_bytes
                         .fetch_add(value.len() as u64, std::sync::atomic::Ordering::Relaxed);
                 }
-                value.map(|slice| slice.to_vec())
+                item.map(|slice| slice.to_vec())
             }
 
             GenericDatabase::Sled(db) => {

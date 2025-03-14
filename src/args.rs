@@ -71,7 +71,7 @@ pub struct RunOptions {
 
     // TODO: zipf exponent
     /// Whether to use random or Zipfian read distribution
-    #[arg(long, default_value_t = false)]
+    #[arg(long, default_value_t = true)]
     pub random: bool,
 
     #[arg(long, default_value_t = false)]
