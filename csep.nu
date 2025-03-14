@@ -9,7 +9,7 @@ let data_dir = ".data"
 let seconds = 1 * 180
 let cache_mib = 4000
 let value_size = 1024
-let display_name = "monkey"
+let display_name = "baseline"
 
 #
 # BENCH
